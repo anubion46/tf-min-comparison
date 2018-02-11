@@ -25,6 +25,19 @@ class FunGen:
             self.functions.append((f, min_point, min_value))
         return self.functions
 
+    def c1(self):
+        seed(10)
+        for _ in range(self.n):
+            min_point = [random() for _ in range(self.dim)]
+            min_value = random()
+            f = min_value
+            for i in range(self.dim):
+                a = random() / (random() + 0.1)
+                f += a * (self.x[i] - min_point[i]) ** (4/3)
+
+            self.functions.append((f, min_point, min_value))
+        return self.functions
+
 
 class PointGen:
     def __init__(self, dim, n, r, start):
