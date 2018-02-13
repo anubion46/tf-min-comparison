@@ -47,12 +47,39 @@ def optimal_learning_rate(method, f, samples, st_p, funcs):
     return [sample_lr, res, st_p]
 
 
-def main():
-    # Initial approximations
-    n_funcs = ind.n_funcs
-    n_points = ind.n_points
-    r = ind.r
+def processC1(n_funcs, n_points, r):
+    for dim in n_funcs.keys():
+        with open('output/c1.csv', 'w', newline='') as output:
+            fieldnames = ['№F', 'START', 'OLR', 'ITER', 'METHOD']
+            thewriter = csv.DictWriter(output, fieldnames=fieldnames)
+            thewriter.writeheader()
+            momentum, adam, adadelta, adagrad = [], [], [], []
+            for i in range(n_funcs[dim]):
+                funcs = generator.FunGen(dim, n_funcs[dim])
+                f = funcs.c1()[i]
+                starting_points = generator.PointGen(dim, n_points, r, f[1]).create_points()
+                for st_p in starting_points:
+                    momentum.append(optimal_learning_rate('momentum', f, ind.momentum_lr, st_p, funcs))
+                    adam.append(optimal_learning_rate('adam', f,  ind.adam_lr, st_p, funcs))
+                    adadelta.append(optimal_learning_rate('adadelta', f, ind.adadelta_lr, st_p, funcs))
+                    adagrad.append(optimal_learning_rate('adagrad', f, ind.adagrad_lr, st_p, funcs))
+                print('\n')
 
+            k = 1
+            for i in range(n_funcs[dim]):
+                for j in range(n_points):
+                    thewriter.writerow(
+                        {'№F': i + 1, 'START': momentum[i*k + j][2], 'OLR': momentum[i*k + j][0], 'ITER': momentum[i*k + j][1], 'METHOD': 'MOMENTUM'})
+                    thewriter.writerow(
+                        {'№F': i + 1, 'START': adam[i*k + j][2], 'OLR': adam[i*k + j][0], 'ITER': adam[i*k + j][1], 'METHOD': 'ADAM'})
+                    thewriter.writerow(
+                        {'№F': i + 1, 'START': adadelta[i*k + j][2], 'OLR': adadelta[i][0], 'ITER': adadelta[i*k + j][1], 'METHOD': 'ADADELTA'})
+                    thewriter.writerow(
+                        {'№F': i + 1, 'START': adagrad[i*k + j][2], 'OLR': adagrad[i][0], 'ITER': adagrad[i*k + j][1], 'METHOD': 'ADAGRAD'})
+                k += 1
+
+
+def processC2(n_funcs, n_points, r):
     for dim in n_funcs.keys():
         with open('output/c2.csv', 'w', newline='') as output:
             fieldnames = ['№F', 'START', 'OLR', 'ITER', 'METHOD']
@@ -83,35 +110,22 @@ def main():
                         {'№F': i + 1, 'START': adagrad[i*k + j][2], 'OLR': adagrad[i][0], 'ITER': adagrad[i*k + j][1], 'METHOD': 'ADAGRAD'})
                 k += 1
 
-    for dim in n_funcs.keys():
-        with open('output/c1.csv', 'w', newline='') as output:
-            fieldnames = ['№F', 'START', 'OLR', 'ITER', 'METHOD']
-            thewriter = csv.DictWriter(output, fieldnames=fieldnames)
-            thewriter.writeheader()
-            momentum, adam, adadelta, adagrad = [], [], [], []
-            for i in range(n_funcs[dim]):
-                funcs = generator.FunGen(dim, n_funcs[dim])
-                f = funcs.c1()[i]
-                starting_points = generator.PointGen(dim, n_points, r, f[1]).create_points()
-                for st_p in starting_points:
-                    momentum.append(optimal_learning_rate('momentum', f, ind.momentum_lr, st_p, funcs))
-                    adam.append(optimal_learning_rate('adam', f,  ind.adam_lr, st_p, funcs))
-                    adadelta.append(optimal_learning_rate('adadelta', f, ind.adadelta_lr, st_p, funcs))
-                    adagrad.append(optimal_learning_rate('adagrad', f, ind.adagrad_lr, st_p, funcs))
-                print('\n')
 
-            k = 1
-            for i in range(n_funcs[dim]):
-                for j in range(n_points):
-                    thewriter.writerow(
-                        {'№F': i + 1, 'START': momentum[i*k + j][2], 'OLR': momentum[i*k + j][0], 'ITER': momentum[i*k + j][1], 'METHOD': 'MOMENTUM'})
-                    thewriter.writerow(
-                        {'№F': i + 1, 'START': adam[i*k + j][2], 'OLR': adam[i*k + j][0], 'ITER': adam[i*k + j][1], 'METHOD': 'ADAM'})
-                    thewriter.writerow(
-                        {'№F': i + 1, 'START': adadelta[i*k + j][2], 'OLR': adadelta[i][0], 'ITER': adadelta[i*k + j][1], 'METHOD': 'ADADELTA'})
-                    thewriter.writerow(
-                        {'№F': i + 1, 'START': adagrad[i*k + j][2], 'OLR': adagrad[i][0], 'ITER': adagrad[i*k + j][1], 'METHOD': 'ADAGRAD'})
-                k += 1
+def processC1_mc():
+    pass
+
+
+def processC2_mc():
+    pass
+
+
+def main():
+    # Initial approximations
+    n_funcs = ind.n_funcs
+    n_points = ind.n_points
+    r = ind.r
+
+    processC1(n_funcs, n_points, r)
 
 
 if __name__ == "__main__":

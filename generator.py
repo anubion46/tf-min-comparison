@@ -1,6 +1,14 @@
 import tensorflow as tf
 from random import random, seed
 import numpy as np
+from itertools import tee, chain, product
+
+
+def sum_squares(x, min_point, min_value):
+    res = min_value
+    for i in range(len(min_point)):
+        res += (x[i] - min_point[i]) ** 2
+    return res
 
 
 class FunGen:
@@ -12,31 +20,50 @@ class FunGen:
         for i in range(self.dim):
             self.x.append(tf.Variable(dtype=tf.float32, initial_value=1.0, name=('x' + str(i))))
 
-    def c2(self):
+    def c1(self, mc=False):
         seed(10)
-        for _ in range(self.n):
-            min_point = [random() for _ in range(self.dim)]
-            min_value = random()
-            f = min_value
-            for i in range(self.dim):
-                a = random() / (random() + 0.1)
-                f += a * (self.x[i] - min_point[i]) ** 2
+        if mc:
+            for _ in range(self.n):
+                min_point = [random() for _ in range(self.dim)]
+                min_value = random()
+                f = np.vectorize(sum_squares, excluded=['x', 'min_point', 'min_value'])
 
-            self.functions.append((f, min_point, min_value))
-        return self.functions
+                self.functions.append((f, min_point, min_value))
+            return self.functions
 
-    def c1(self):
+        else:
+            for _ in range(self.n):
+                min_point = [random() for _ in range(self.dim)]
+                min_value = random()
+                f = min_value
+                for i in range(self.dim):
+                    a = random() / (random() + 0.1)
+                    f += a * (self.x[i] - min_point[i]) ** (4 / 3)
+
+                self.functions.append((f, min_point, min_value))
+            return self.functions
+
+    def c2(self, mc=False):
         seed(10)
-        for _ in range(self.n):
-            min_point = [random() for _ in range(self.dim)]
-            min_value = random()
-            f = min_value
-            for i in range(self.dim):
-                a = random() / (random() + 0.1)
-                f += a * (self.x[i] - min_point[i]) ** (4/3)
+        if mc:
+            for _ in range(self.n):
+                min_point = [random() for _ in range(self.dim)]
+                min_value = random()
+                f = np.vectorize(sum_squares, excluded=['x', 'min_point', 'min_value'])
+                self.functions.append((f, min_point, min_value))
+            return self.functions
 
-            self.functions.append((f, min_point, min_value))
-        return self.functions
+        else:
+            for _ in range(self.n):
+                min_point = [random() for _ in range(self.dim)]
+                min_value = random()
+                f = min_value
+                for i in range(self.dim):
+                    a = random() / (random() + 0.1)
+                    f += a * (self.x[i] - min_point[i]) ** 2
+
+                self.functions.append((f, min_point, min_value))
+            return self.functions
 
 
 class PointGen:
@@ -61,3 +88,15 @@ class PointGen:
                 point.append(temp)
             self.points.append([x + y for x, y in zip(point, self.start)])
         return self.points
+
+
+def pairwise(iterable):
+    # s -> (s0,s1), (s1,s2), (s2, s3), ...
+    a, b = tee(iterable)
+    next(b, None)
+    return zip(a, b)
+
+
+def f(n, ls):
+    values = np.linspace(0, 1.0, ls)
+    return list(chain.from_iterable(product(x, repeat=n) for x in pairwise(values)))
