@@ -11,15 +11,16 @@ and learning rates for each method
 import numpy as np
 
 
-n_funcs = {3: 4}
+n_funcs = {3: 6, 5: 4, 10: 2}
 
-n_iter = 300
+n_iter = 10000
 eps = 1e-6
 
-n_points = 4
-r = 0.8
+n_points = 5
+r = 0.9
+th = 100
 
-momentum_lr = np.linspace(.4, 1.0, 5)
-adam_lr = np.linspace(.4, 1.0, 5)
-adadelta_lr = np.linspace(10, 3000, 5)
-adagrad_lr = np.linspace(0.1, 27, 5)
+momentum_lr = np.linspace(.01, .3, 10)
+adam_lr = np.linspace(.4, 1.0, 10)
+adadelta_lr = np.linspace(0, 70, 10)
+adagrad_lr = np.linspace(0, 70, 10)

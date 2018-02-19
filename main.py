@@ -17,12 +17,15 @@ def check_optimizer(optimizer, f, st_p, funcs):
         n = 0
         fs = []
         while True:
+            if n == ind.th:
+                # Get the median
+                pass
             sess.run(optimizer)
             fs.append(sess.run(f[0]))
             n += 1
             if n >= ind.n_iter:
                 return -1
-            if check_min(fs[len(fs) - 1], f[2]):
+            if check_min(fs[-1], f[2]):
                 return n
 
 

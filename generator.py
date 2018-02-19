@@ -32,7 +32,7 @@ class FunGen:
             return self.functions
 
         else:
-            for _ in range(self.n):
+            for j in range(self.n):
                 min_point = [random() for _ in range(self.dim)]
                 min_value = random()
                 f = min_value
@@ -40,7 +40,7 @@ class FunGen:
                     a = random() / (random() + 0.1)
                     f += a * (self.x[i] - min_point[i]) ** (4 / 3)
 
-                self.functions.append((f, min_point, min_value))
+                self.functions.append((f, min_point, min_value, str(j) + '_' + str(self.dim)))
             return self.functions
 
     def c2(self, mc=False):
@@ -54,7 +54,7 @@ class FunGen:
             return self.functions
 
         else:
-            for _ in range(self.n):
+            for j in range(self.n):
                 min_point = [random() for _ in range(self.dim)]
                 min_value = random()
                 f = min_value
@@ -62,7 +62,7 @@ class FunGen:
                     a = random() / (random() + 0.1)
                     f += a * (self.x[i] - min_point[i]) ** 2
 
-                self.functions.append((f, min_point, min_value))
+                self.functions.append((f, min_point, min_value, str(j) + '_' + str(self.dim)))
             return self.functions
 
 
