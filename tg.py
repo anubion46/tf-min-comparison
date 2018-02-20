@@ -17,7 +17,7 @@ def check_optimizer(optimizer, f, st_p, funcs):
         n = 0
         fs = []
         trend = []
-        res_iter = 0
+        res_iter = -1
         for _ in range(ind.n_iter):
             if len(fs) == ind.th:
                 trend.append(np.median(fs))

@@ -11,7 +11,7 @@ and learning rates for each method
 import numpy as np
 
 
-n_funcs = {3: 6, 5: 4, 10: 2}
+n_funcs = {3: 2, 10: 1}
 
 n_iter = 10000
 eps = 1e-6
@@ -22,5 +22,5 @@ th = 100
 
 momentum_lr = np.linspace(.01, .3, 10)
 adam_lr = np.linspace(.4, 1.0, 10)
-adadelta_lr = np.linspace(0, 70, 10)
-adagrad_lr = np.linspace(0, 70, 10)
+adadelta_lr = np.linspace(0.5, 70, 10)
+adagrad_lr = np.linspace(0.5, 70, 10)
