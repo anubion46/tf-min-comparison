@@ -12,15 +12,16 @@ import numpy as np
 
 
 n_funcs = {3: 2, 10: 1}
+methods = ['momentum', 'adam', 'adadelta', 'adagrad']
 
-n_iter = 10000
+n_iter = 5000
 eps = 1e-6
 
-n_points = 5
+n_points = 3
 r = 0.9
-th = 100
+th = 200
 
-momentum_lr = np.linspace(.01, .3, 10)
-adam_lr = np.linspace(.4, 1.0, 10)
-adadelta_lr = np.linspace(0.5, 70, 10)
-adagrad_lr = np.linspace(0.5, 70, 10)
+momentum_lr = np.linspace(.01, .3, 6)
+adam_lr = np.linspace(.4, 1.0, 6)
+adadelta_lr = np.linspace(0.1, 12, 6)
+adagrad_lr = np.linspace(0.1, 12, 6)

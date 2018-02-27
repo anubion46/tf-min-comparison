@@ -17,7 +17,7 @@ def check_optimizer(optimizer, f, st_p, funcs):
         n = 0
         fs = []
         trend = []
-        res_iter = -1
+        res_iter = ind.n_iter
         for _ in range(ind.n_iter):
             if len(fs) == ind.th:
                 trend.append(np.median(fs))
@@ -25,7 +25,7 @@ def check_optimizer(optimizer, f, st_p, funcs):
             sess.run(optimizer)
             fs.append(sess.run(f[0]))
             n += 1
-            if check_min(fs[-1], f[2]):
+            if check_min(fs[-1], f[2]) and res_iter > n:
                 res_iter = n
     return res_iter, trend
 
@@ -37,7 +37,7 @@ def run_momentum(method, f, sample_lrs, st_p, funcs, thewriter):
 
         # Write to file for every learning rate
         for i in range(len(min_iter[1])):
-            thewriter.writerow({'METHOD': method, 'LR': sample, 'VALUE': min_iter[1][i]})
+            thewriter.writerow({'method': method, 'learning_rate': sample, 'value': min_iter[1][i]})
 
         if (res[0] < 0 and min_iter[0] != -1) or (res[0] > min_iter[0] != -1):
             res = min_iter
@@ -52,7 +52,7 @@ def run_adam(method, f, sample_lrs, st_p, funcs, thewriter):
 
         # Write to file for every learning rate
         for i in range(len(min_iter[1])):
-            thewriter.writerow({'METHOD': method, 'LR': sample, 'VALUE': min_iter[1][i]})
+            thewriter.writerow({'method': method, 'learning_rate': sample, 'value': min_iter[1][i]})
 
         if (res[0] < 0 and min_iter[0] != -1) or (res[0] > min_iter[0] != -1):
             res = min_iter
@@ -67,7 +67,7 @@ def run_adadelta(method, f, sample_lrs, st_p, funcs, thewriter):
 
         # Write to file for every learning rate
         for i in range(len(min_iter[1])):
-            thewriter.writerow({'METHOD': method, 'LR': sample, 'VALUE': min_iter[1][i]})
+            thewriter.writerow({'method': method, 'learning_rate': sample, 'value': min_iter[1][i]})
 
         if (res[0] < 0 and min_iter[0] != -1) or (res[0] > min_iter[0] != -1):
             res = min_iter
@@ -82,7 +82,7 @@ def run_adagrad(method, f, sample_lrs, st_p, funcs, thewriter_t):
 
         # Write to file for every learning rate
         for i in range(len(min_iter[1])):
-            thewriter_t.writerow({'METHOD': method, 'LR': sample, 'VALUE': min_iter[1][i]})
+            thewriter_t.writerow({'method': method, 'learning_rate': sample, 'value': min_iter[1][i]})
 
         if (res[0] < 0 and min_iter[0] != -1) or (res[0] > min_iter[0] != -1):
             res = min_iter
@@ -106,72 +106,37 @@ def optimal_learning_rate(method, f, sample_lrs, st_p, funcs, thewriter_t):
     return result
 
 
-def processC1(n_funcs, n_points, r):
-    for dim in n_funcs.keys():
-        with open('output/c1.csv', 'w', newline='') as output:
-            fieldnames = ['№F', 'START', 'OLR', 'ITER', 'METHOD']
-            thewriter = csv.DictWriter(output, fieldnames=fieldnames)
-            thewriter.writeheader()
-            momentum, adam, adadelta, adagrad = [], [], [], []
-            for i in range(n_funcs[dim]):
-                funcs = generator.FunGen(dim, n_funcs[dim])
-                f = funcs.c1()[i]
-                starting_points = generator.PointGen(dim, n_points, r, f[1]).create_points()
-                for st_p in starting_points:
-                    momentum.append(optimal_learning_rate('momentum', f, ind.momentum_lr, st_p, funcs))
-                    adam.append(optimal_learning_rate('adam', f,  ind.adam_lr, st_p, funcs))
-                    adadelta.append(optimal_learning_rate('adadelta', f, ind.adadelta_lr, st_p, funcs))
-                    adagrad.append(optimal_learning_rate('adagrad', f, ind.adagrad_lr, st_p, funcs))
-                print('\n')
-
-            k = 1
-            for i in range(n_funcs[dim]):
-                for j in range(n_points):
-                    thewriter.writerow(
-                        {'№F': i + 1, 'START': momentum[i*k + j][2], 'OLR': momentum[i*k + j][0], 'ITER': momentum[i*k + j][1], 'METHOD': 'MOMENTUM'})
-                    thewriter.writerow(
-                        {'№F': i + 1, 'START': adam[i*k + j][2], 'OLR': adam[i*k + j][0], 'ITER': adam[i*k + j][1], 'METHOD': 'ADAM'})
-                    thewriter.writerow(
-                        {'№F': i + 1, 'START': adadelta[i*k + j][2], 'OLR': adadelta[i][0], 'ITER': adadelta[i*k + j][1], 'METHOD': 'ADADELTA'})
-                    thewriter.writerow(
-                        {'№F': i + 1, 'START': adagrad[i*k + j][2], 'OLR': adagrad[i][0], 'ITER': adagrad[i*k + j][1], 'METHOD': 'ADAGRAD'})
-                k += 1
-
-
-def processC2(n_funcs, n_points, r):
-    with open('output/c2.csv', 'w', newline='') as output:
-        fieldnames = ['№F', 'START', 'OLR', 'ITER', 'METHOD']
+def process(function_type, n_funcs, n_points, r, methods):
+    with open('output/' + function_type + '.csv', 'w', newline='') as output, open('output/functions', 'w', newline='') as output_f:
+        fieldnames = ['number', 'start', 'optimal_lr', 'iterations', 'method']
         thewriter = csv.DictWriter(output, fieldnames=fieldnames)
         thewriter.writeheader()
+
         for dim in n_funcs.keys():
             funcs = generator.FunGen(dim, n_funcs[dim])
             for i in range(n_funcs[dim]):
-                f = funcs.c2()[i]
+                f = funcs.generate(function_type)[i]
                 starting_points = generator.PointGen(dim, n_points, r, f[1]).create_points()
                 l = 0
+
+                output_f.write('-'*5 + 'Function ' + str(l+1) + '-'*5 + '\n\n')
+                for h in range(dim):
+                    output_f.write(str(f[4][h]) + '(x' + str(h + 1) + ' + ' + str(f[1][h]) + ')^' + str(f[5]) + ' + ')
+                output_f.write(str(f[2]) + '\n\n\n')
+                output_f.write('Starting points:\n')
+                for d in range(n_points):
+                    output_f.write(str(d + 1) + ': ' + str(starting_points[d]) + '\n')
+                output_f.write('\n' + '-'*10 + '\n')
+
                 for st_p in starting_points:
                     with open('output/trend_' + f[3] + '_' + str(l) + '.csv', 'w', newline='') as output_t:
-                        fieldnames_t = ['METHOD', 'LR', 'VALUE']
+                        fieldnames_t = ['method', 'learning_rate', 'value']
                         thewriter_t = csv.DictWriter(output_t, fieldnames=fieldnames_t)
                         thewriter_t.writeheader()
-                        momentum_temp = optimal_learning_rate('momentum', f, ind.momentum_lr, st_p, funcs, thewriter_t)
-                        adam_temp = optimal_learning_rate('adam', f,  ind.adam_lr, st_p, funcs, thewriter_t)
-                        adadelta_temp = optimal_learning_rate('adadelta', f, ind.adadelta_lr, st_p, funcs, thewriter_t)
-                        adagrad_temp = optimal_learning_rate('adagrad', f, ind.adagrad_lr, st_p, funcs, thewriter_t)
-
-                    thewriter.writerow({'№F': i, 'START': momentum_temp[2], 'OLR': momentum_temp[0], 'ITER': momentum_temp[1][0], 'METHOD': 'MOMENTUM'})
-                    thewriter.writerow({'№F': i, 'START': adam_temp[2], 'OLR': adam_temp[0], 'ITER': adam_temp[1][0], 'METHOD': 'ADAM'})
-                    thewriter.writerow({'№F': i, 'START': adadelta_temp[2], 'OLR': adadelta_temp[0], 'ITER': adadelta_temp[1][0], 'METHOD': 'ADADELTA'})
-                    thewriter.writerow({'№F': i, 'START': adagrad_temp[2], 'OLR': adagrad_temp[0], 'ITER': adagrad_temp[1][0], 'METHOD': 'ADAGRAD'})
+                        for met in methods:
+                            res = optimal_learning_rate(met, f, ind.momentum_lr, st_p, funcs, thewriter_t)
+                            thewriter.writerow({'number': i, 'start': res[2], 'optimal_lr': res[0], 'iterations': res[1][0], 'method': met})
                     l += 1
-
-
-def processC1_mc():
-    pass
-
-
-def processC2_mc():
-    pass
 
 
 def main():
@@ -179,8 +144,9 @@ def main():
     n_funcs = ind.n_funcs
     n_points = ind.n_points
     r = ind.r
+    methods = ind.methods
 
-    processC2(n_funcs, n_points, r)
+    process('c2', n_funcs, n_points, r, methods)
 
 
 if __name__ == "__main__":
