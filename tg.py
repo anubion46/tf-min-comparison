@@ -119,14 +119,14 @@ def process(function_type, n_funcs, n_points, r, methods):
                 starting_points = generator.PointGen(dim, n_points, r, f[1]).create_points()
                 l = 0
 
-                output_f.write('-'*5 + 'Function ' + str(l+1) + '-'*5 + '\n\n')
+                output_f.write('-'*7 + 'Function ' + str(i+1) + '-'*7 + '\n\n')
                 for h in range(dim):
-                    output_f.write(str(f[4][h]) + '(x' + str(h + 1) + ' + ' + str(f[1][h]) + ')^' + str(f[5]) + ' + ')
+                    output_f.write(str(round(f[4][h], 5)) + ' * (x' + str(h + 1) + ' + ' + str(round(f[1][h], 5)) + ')^' + str(f[5]) + ' + ')
                 output_f.write(str(f[2]) + '\n\n\n')
                 output_f.write('Starting points:\n')
                 for d in range(n_points):
-                    output_f.write(str(d + 1) + ': ' + str(starting_points[d]) + '\n')
-                output_f.write('\n' + '-'*10 + '\n')
+                    output_f.write(str(d + 1) + ': ' + str(round(starting_points[d], 5)) + '\n')
+                output_f.write('\n\n')
 
                 for st_p in starting_points:
                     with open('output/trend_' + f[3] + '_' + str(l) + '.csv', 'w', newline='') as output_t:
