@@ -1,22 +1,28 @@
 import numpy as np
 from random import random, seed
 import generator
+import tensorflow as tf
 
 
-def monte_carlo_local(func, dim, amount):
-    seed(10)
+def monte_carlo_local(funcs, f, dim, amount):
+    seed(12)
     points = [[random() for _ in range(dim)] for _ in range(amount)]
-    temp = [func[0](min_point=func[1], min_value=func[2], a=func[3], power=func[4], x=point) for point in points]
-    min_index = np.argmin(temp)
-    return temp[min_index], points[min_index]
+    with tf.Session() as sess:
+        old = sess.run(f[0], feed_dict={funcs.x: points[0]})
+        index = 0
+        for i in range(len(points)):
+            new = sess.run(f[0], feed_dict={funcs.x: points[i]})
+            if old > new:
+                old = new
+                index = i
+    return old, points[index]
 
 
 def monte_carlo(functions, dim, amount):
-    return [monte_carlo_local(f, dim, amount) for f in functions]
+    return [monte_carlo_local(functions, f, dim, amount) for f in functions.generate('c2')]
 
 
 amount = 15000
-dim = 6
-functions = generator.FunGen(dim, 1).generate('c2', mc=True)
+dim = 3
+functions = generator.FunGen(dim, 1)
 print(monte_carlo(functions, dim, amount))
-print(functions[0][2])

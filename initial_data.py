@@ -3,25 +3,36 @@ This is a setup file containing:
 - n_functions (dictionary): number of dimensions: number of functions
 - n_iter: upper threshold of iterations
 - eps: error of calculations
+- methods: methods to be tested
 - n_points: number of starting points
 - r: radius for hypersphere
+- window: window for trends
 and learning rates for each method
 """
 
 import numpy as np
 
+# ~ 2 hours for this data
 
-n_funcs = {3: 2, 10: 1}
+# Dictionary containing number functions for each present dimension
+n_funcs = {3: 2}
+
+# Methods to be tested
 methods = ['momentum', 'adam', 'adadelta', 'adagrad']
 
-n_iter = 5000
-eps = 1e-6
+# Upper threshold for the number of iterations and epsilon
+n_iter = 3000
+eps = 1e-7
 
-n_points = 3
+# Window for trends
+window = 60
+
+# Input values for the number of points to be generated and radius for hypersphere
+n_points = 2
 r = 0.9
-th = 200
 
-momentum_lr = np.linspace(.01, .3, 6)
-adam_lr = np.linspace(.4, 1.0, 6)
-adadelta_lr = np.linspace(0.1, 12, 6)
-adagrad_lr = np.linspace(0.1, 12, 6)
+# Learning rates to be tested during calculations
+momentum_lr = np.geomspace(.01, .3, 5)
+adam_lr = np.geomspace(.4, 1.0, 5)
+adadelta_lr = np.geomspace(0.1, 10, 5)
+adagrad_lr = np.geomspace(0.1, 10, 5)

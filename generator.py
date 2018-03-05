@@ -3,23 +3,14 @@ from random import random, seed
 import numpy as np
 
 
-def sum_func(x, min_point, min_value, a, power):
-    res = min_value
-    for i in range(len(min_point)):
-        res += a[i]*(x[i] - min_point[i]) ** power
-    return res
-
-
 class FunGen:
     def __init__(self, dim, n):
         self.dim = dim
         self.n = n
         self.functions = []
-        self.x = []
-        for i in range(self.dim):
-            self.x.append(tf.Variable(dtype=tf.float32, initial_value=1.0, name=('x' + str(i))))
+        self.x = tf.get_variable('x', [dim])
 
-    def generate(self, function_type, mc=False):
+    def generate(self, function_type):
         seed(10)
         if function_type == 'c1':
             power = 4/3
@@ -28,24 +19,18 @@ class FunGen:
         else:
             raise ValueError()
 
-        if mc:
-            for _ in range(self.n):
-                min_point = [random() for _ in range(self.dim)]
-                a = [random() / (random() + 0.1) for _ in range(self.dim)]
-                min_value = random()
-                self.functions.append((sum_func, min_point, min_value, a, power))
-            return self.functions
+        for j in range(self.n):
+            a_random = [random() for _ in range(self.dim)]
+            min_point_random = [random() for _ in range(self.dim)]
+            min_value_random = random()
 
-        else:
-            for j in range(self.n):
-                min_point = [random() for _ in range(self.dim)]
-                a = [random() / (random() + 0.1) for _ in range(self.dim)]
-                min_value = random()
-                f = min_value
-                for i in range(self.dim):
-                    f += a[i] * (self.x[i] - min_point[i]) ** power
-                self.functions.append((f, min_point, min_value, str(j) + '_' + str(self.dim), a, power))
-            return self.functions
+            a = tf.constant(a_random)
+            min_point = tf.constant(min_point_random)
+            min_value = tf.constant(min_value_random)
+
+            f = tf.add(min_value, tf.reduce_sum(tf.multiply(a, tf.pow(tf.subtract(self.x, min_point), power))))
+            self.functions.append((f, min_point_random, min_value_random, str(self.dim) + '_' + str(j), a_random, power))
+        return self.functions
 
 
 class PointGen:

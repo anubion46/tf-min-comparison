@@ -1,7 +1,7 @@
 library(ggplot2)
-trends = read.csv('trend_0_10_0.csv')
+trends = read.csv('trend_3_0_0.csv')
 
-n = 6
+n = 5
 
 adam_trends = trends[trends[,1] == 'adam',]
 adam_trends$learning_rate = factor(adam_trends$learning_rate)
