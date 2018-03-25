@@ -15,24 +15,22 @@ import numpy as np
 # ~ 2 hours for this data
 
 # Dictionary containing number functions for each present dimension
-n_funcs = {3: 2}
+n_funcs = {2: 2, 3: 3, 6: 2, 10: 2, 15: 2}
 
 # Methods to be tested
-methods = ['momentum', 'adam', 'adadelta', 'adagrad']
+# Learning rates to be tested during calculations
+methods = {'momentum': np.geomspace(.01, .3, 10),
+           'adam': np.geomspace(.4, 1.0, 10),
+           'adadelta': np.geomspace(0.1, 10, 10),
+           'adagrad': np.geomspace(0.1, 10, 10)}
 
 # Upper threshold for the number of iterations and epsilon
-n_iter = 3000
-eps = 1e-7
+n_iter = 5000
+eps = 1e-5
 
 # Window for trends
-window = 60
+window = 30
 
 # Input values for the number of points to be generated and radius for hypersphere
-n_points = 2
-r = 0.9
-
-# Learning rates to be tested during calculations
-momentum_lr = np.geomspace(.01, .3, 5)
-adam_lr = np.geomspace(.4, 1.0, 5)
-adadelta_lr = np.geomspace(0.1, 10, 5)
-adagrad_lr = np.geomspace(0.1, 10, 5)
+n_points = 5
+r = 0.8
