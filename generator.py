@@ -4,11 +4,12 @@ import numpy as np
 
 
 class FunGen:
-    def __init__(self, dim, n):
+    def __init__(self, dim, n, scope):
         self.dim = dim
         self.n = n
         self.functions = []
-        self.x = tf.get_variable('x' + str(dim), [dim])
+        with tf.variable_scope(scope, reuse=tf.AUTO_REUSE):
+            self.x = tf.get_variable('x' + str(dim), [dim], )
 
     def generate(self, proto_function):
         self.functions = [proto_function(self.x, self.dim) for _ in range(self.n)]

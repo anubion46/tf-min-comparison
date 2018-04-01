@@ -72,13 +72,13 @@ class Test:
     # This is the essentially the most important function. All of the writing to files happens here
     def process(self):
         # Create test directory if not exist
-        if not os.path.exists('output/' + self.path):
-            os.makedirs('output/' + self.path)
+        if not os.path.exists('output/' + self.path + '/'):
+            os.makedirs('output/' + self.path + '/')
         # Disable logs
         os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
         # Opening files to write general information for tests and functions
-        with open('output/' + self.path + 'results' + '.csv', 'w', newline='') as output, open('output/' + self.path + 'summary.txt', 'w', newline='') as output_f:
+        with open('output/' + self.path + '/' + 'results' + '.csv', 'w', newline='') as output, open('output/' + self.path + '/' + 'summary.txt', 'w', newline='') as output_f:
             # Column names for tests files (i.e. c1, c2)
             fieldnames = ['number', 'start', 'optimal_lr', 'iterations', 'method']
             # Writing columns to file. Look up python's csv module
@@ -90,7 +90,7 @@ class Test:
             # For each dimension in the given dictionary do the following
             for dim in self.function_amount.keys():
                 # Create a generator object for functions
-                pre_generated_functions = generator.FunGen(dim, self.function_amount[dim])
+                pre_generated_functions = generator.FunGen(dim, self.function_amount[dim], self.path)
                 generated_functions = pre_generated_functions.generate(self.proto_function)
                 f_n = self.function_amount[dim]
                 # Create a required amount of functions of a certain dimension
@@ -119,7 +119,7 @@ class Test:
                         output_f.write('-' * 25 + '\n')
                         output_f.write(str(d) + ': \t' + str(st_p) + '\n\n')
                         # Open file to write down trends
-                        with open('output/' + self.path + 'trajectory_' + str(dim) + '_' + str(i) + '_' + str(l) + '.csv', 'w', newline='') as output_t:
+                        with open('output/' + self.path + '/' + 'trajectory_' + str(dim) + '_' + str(i) + '_' + str(l) + '.csv', 'w', newline='') as output_t:
                             # Column names for test files (i.e. trend_*_*)
                             fieldnames_t = ['method', 'learning_rate', 'value']
                             # Writing columns to file. Look up python's csv module
