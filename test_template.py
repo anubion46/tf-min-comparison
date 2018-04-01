@@ -3,11 +3,10 @@ import generator
 import numpy as np
 import csv
 import os
-# import initial_data as ind
 
 
 class Test:
-    def __init__(self, path, proto_function, function_amount, m, r, methods, iter_threshold, eps, window):
+    def __init__(self, path, proto_function, function_amount, m, r, methods, iter_threshold, window, rho, eps=1e-5):
         self.path = path
         self.proto_function = proto_function
         self.function_amount = function_amount
@@ -17,18 +16,19 @@ class Test:
         self.iter_threshold = iter_threshold
         self.eps = eps
         self.window = window
+        self.rho = rho
 
-    def check_optimizer(self, optimizer, f, st_p, pre_generated_functions):
+    def __check_optimizer(self, optimizer, f, st_p, pre_generated_functions):
         pre_generated_functions.x.assign(st_p)
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())  # reset values to wrong
             n = 0
             fs = []
-            trend = []
+            trajectory = []
             res_iter = self.iter_threshold
             for _ in range(self.iter_threshold):
                 if len(fs) == self.window:
-                    trend.append(np.median(fs))
+                    trajectory.append(np.median(fs))
                     del fs[0:self.window//2]
                 _, s = sess.run([optimizer, f[0]])
                 fs.append(s)
@@ -37,24 +37,26 @@ class Test:
                     res_iter = n
 
             res_point, res_value = sess.run([pre_generated_functions.x, f[0]])
-        return res_iter, trend, res_point, res_value
+        return res_iter, trajectory, res_point, res_value
 
     # Identify optimal learning rate of a method for a function
-    def optimal_learning_rate(self, method, f, sample_lrs, st_p, pre_generated_functions, thewriter_t):
+    def __optimal_learning_rate(self, method, f, sample_lrs, st_p, pre_generated_functions, thewriter_t):
         res, sample_lr = [-1, -1], -1
         for sample in sample_lrs:
             if method == 'momentum':
-                min_method = tf.train.MomentumOptimizer(learning_rate=sample, momentum=0.99, use_nesterov=True)
+                min_method = tf.train.MomentumOptimizer(learning_rate=sample, momentum=0.99999999, use_nesterov=True)
             elif method == 'adam':
                 min_method = tf.train.AdamOptimizer(learning_rate=sample)
             elif method == 'adadelta':
-                min_method = tf.train.AdadeltaOptimizer(learning_rate=sample)
+                min_method = tf.train.AdadeltaOptimizer(learning_rate=sample, rho=self.rho)
             elif method == 'adagrad':
                 min_method = tf.train.AdagradOptimizer(learning_rate=sample)
+            elif method == 'RMS':
+                min_method = tf.train.RMSPropOptimizer(learning_rate=sample, decay=self.rho)
             else:
                 raise ValueError()
 
-            min_iter = self.check_optimizer(min_method.minimize(f[0]), f, st_p, pre_generated_functions)
+            min_iter = self.__check_optimizer(min_method.minimize(f[0]), f, st_p, pre_generated_functions)
 
             with tf.Session() as sess:
                 thewriter_t.writerow({'method': method, 'learning_rate': sample, 'value': sess.run(f[0], feed_dict={pre_generated_functions.x: st_p})})
@@ -76,7 +78,7 @@ class Test:
         os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
         # Opening files to write general information for tests and functions
-        with open('output/' + self.path + 'results' + '.csv', 'w', newline='') as output, open('output/' + self.path + 'summary', 'w', newline='') as output_f:
+        with open('output/' + self.path + 'results' + '.csv', 'w', newline='') as output, open('output/' + self.path + 'summary.txt', 'w', newline='') as output_f:
             # Column names for tests files (i.e. c1, c2)
             fieldnames = ['number', 'start', 'optimal_lr', 'iterations', 'method']
             # Writing columns to file. Look up python's csv module
@@ -84,12 +86,12 @@ class Test:
             thewriter.writeheader()
 
             dims_amount = len(self.function_amount.keys())
+            k = 0
             # For each dimension in the given dictionary do the following
             for dim in self.function_amount.keys():
                 # Create a generator object for functions
                 pre_generated_functions = generator.FunGen(dim, self.function_amount[dim])
                 generated_functions = pre_generated_functions.generate(self.proto_function)
-                k = 0
                 f_n = self.function_amount[dim]
                 # Create a required amount of functions of a certain dimension
                 for i in range(f_n):
@@ -104,9 +106,9 @@ class Test:
                     output_f.write('Function ' + str(i+1) + '/' + str(f_n) + ' of dimension ' + str(dim) + '\n')
                     # Write the generated function to function file
                     output_f.write(str(f[1]) + '\n\n')
-                    output_f.write('Expected minimum coordinates: ')
+                    output_f.write('Expected minimum coordinates: \t')
                     output_f.write(str(f[2]) + '\n')
-                    output_f.write('Expected minimum value: ')
+                    output_f.write('Expected minimum value: \t')
                     output_f.write(str(f[3]) + '\n')
 
                     # Write all the generated points to function file
@@ -115,9 +117,9 @@ class Test:
                     # For each starting point do the following
                     for st_p in starting_points:
                         output_f.write('-' * 25 + '\n')
-                        output_f.write(str(d) + ': ' + str(st_p) + '\n\n')
+                        output_f.write(str(d) + ': \t' + str(st_p) + '\n\n')
                         # Open file to write down trends
-                        with open('output/' + self.path + 'trend_' + str(dim) + '_' + str(i) + '_' + str(l) + '.csv', 'w', newline='') as output_t:
+                        with open('output/' + self.path + 'trajectory_' + str(dim) + '_' + str(i) + '_' + str(l) + '.csv', 'w', newline='') as output_t:
                             # Column names for test files (i.e. trend_*_*)
                             fieldnames_t = ['method', 'learning_rate', 'value']
                             # Writing columns to file. Look up python's csv module
@@ -127,11 +129,11 @@ class Test:
                             # For each method to be tested do the following
                             for method in self.methods.keys():
                                 # Calculate optimal learning rate
-                                res = self.optimal_learning_rate(method, f, self.methods[method], st_p, pre_generated_functions, thewriter_t)
+                                res = self.__optimal_learning_rate(method, f, self.methods[method], st_p, pre_generated_functions, thewriter_t)
 
-                                output_f.write(method.upper() + ': ')
+                                output_f.write(method.upper() + ': \t')
                                 output_f.write(str(res[2]))
-                                output_f.write('; Value: ')
+                                output_f.write(';\t Value: ')
                                 output_f.write(str(res[3]) + ' in ' + str(res[1]) + ' iterations with ' + str(res[0]) + ' learning rate' + '\n')
                                 # Write results of the calculations above to the tests file
                                 thewriter.writerow({'number': i, 'start': st_p, 'optimal_lr': res[0], 'iterations': res[1], 'method': method})
