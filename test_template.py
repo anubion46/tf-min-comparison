@@ -3,10 +3,18 @@ import generator
 import numpy as np
 import csv
 import os
+import itertools
+
+
+def scalar(x, y):
+    res = 0
+    for i in range(len(x)):
+        res += (x[i] - y[i]) ** 2
+    return np.sqrt(res)
 
 
 class Test:
-    def __init__(self, path, proto_function, function_amount, m, r, methods, iter_threshold, window, rho, eps=1e-5):
+    def __init__(self, path, proto_function, function_amount, m, r, methods, iter_threshold, decay, eps=1e-5):
         self.path = path
         self.proto_function = proto_function
         self.function_amount = function_amount
@@ -15,54 +23,57 @@ class Test:
         self.methods = methods
         self.iter_threshold = iter_threshold
         self.eps = eps
-        self.window = window
-        self.rho = rho
+        self.decay = decay
 
     def __check_optimizer(self, optimizer, f, st_p, pre_generated_functions):
         pre_generated_functions.x.assign(st_p)
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())  # reset values to wrong
-            n = 0
-            fs = []
-            trajectory = []
+            in_between_points = []
+            len_h = []
             res_iter = self.iter_threshold
-            for _ in range(self.iter_threshold):
-                if len(fs) == self.window:
-                    trajectory.append(np.median(fs))
-                    del fs[0:self.window//2]
-                _, s = sess.run([optimizer, f[0]])
-                fs.append(s)
-                n += 1
-                if np.abs(fs[-1] - f[3]) <= self.eps and res_iter > n:
+            for n in range(self.iter_threshold):
+                _, s, x = sess.run([optimizer, f[0], pre_generated_functions.x])
+                in_between_points.append(s)
+                if n > 0:
+                    len_h.append(scalar(f[2], x))
+                else:
+                    len_h.append(scalar([0 for _ in range(len(x))], x))
+                if np.abs(in_between_points[-1] - f[3]) <= self.eps and res_iter > n:
                     res_iter = n
 
             res_point, res_value = sess.run([pre_generated_functions.x, f[0]])
-        return res_iter, trajectory, res_point, res_value
+        return res_iter, in_between_points, res_point, res_value, len_h
 
     # Identify optimal learning rate of a method for a function
     def __optimal_learning_rate(self, method, f, sample_lrs, st_p, pre_generated_functions, thewriter_t):
         res, sample_lr = [-1, -1], -1
-        for sample in sample_lrs:
+        for sample, decay in itertools.product(sample_lrs, self.decay):
             if method == 'momentum':
+                decay_val = '-'
                 min_method = tf.train.MomentumOptimizer(learning_rate=sample, momentum=0.99999999, use_nesterov=True)
             elif method == 'adam':
+                decay_val = '-'
                 min_method = tf.train.AdamOptimizer(learning_rate=sample)
             elif method == 'adadelta':
-                min_method = tf.train.AdadeltaOptimizer(learning_rate=sample, rho=self.rho)
+                decay_val = decay
+                min_method = tf.train.AdadeltaOptimizer(learning_rate=sample, rho=decay)
             elif method == 'adagrad':
+                decay_val = '-'
                 min_method = tf.train.AdagradOptimizer(learning_rate=sample)
             elif method == 'RMS':
-                min_method = tf.train.RMSPropOptimizer(learning_rate=sample, decay=self.rho)
+                decay_val = decay
+                min_method = tf.train.RMSPropOptimizer(learning_rate=sample, decay=decay)
             else:
                 raise ValueError()
 
             min_iter = self.__check_optimizer(min_method.minimize(f[0]), f, st_p, pre_generated_functions)
 
             with tf.Session() as sess:
-                thewriter_t.writerow({'method': method, 'learning_rate': sample, 'value': sess.run(f[0], feed_dict={pre_generated_functions.x: st_p})})
+                thewriter_t.writerow({'method': method, 'learning_rate': sample, 'decay': decay_val, 'value': sess.run(f[0], feed_dict={pre_generated_functions.x: st_p}), "step_size": 0})
             # Write to file for every learning rate
             for i in range(len(min_iter[1])):
-                thewriter_t.writerow({'method': method, 'learning_rate': sample, 'value': min_iter[1][i]})
+                thewriter_t.writerow({'method': method, 'learning_rate': sample, 'decay': decay_val, 'value': min_iter[1][i], "step_size": min_iter[4][i]})
 
             if (res[0] < 0 and min_iter[0] != -1) or (res[0] > min_iter[0] != -1):
                 res = min_iter
@@ -119,9 +130,9 @@ class Test:
                         output_f.write('-' * 25 + '\n')
                         output_f.write(str(d) + ': \t' + str(st_p) + '\n\n')
                         # Open file to write down trends
-                        with open('output/' + self.path + '/' + 'trajectory_' + str(dim) + '_' + str(i) + '_' + str(l) + '.csv', 'w', newline='') as output_t:
+                        with open('output/' + self.path + '/' + 'test_' + str(dim) + '_' + str(i) + '_' + str(l) + '.csv', 'w', newline='') as output_t:
                             # Column names for test files (i.e. trend_*_*)
-                            fieldnames_t = ['method', 'learning_rate', 'value']
+                            fieldnames_t = ['method', 'learning_rate', 'decay', 'value', 'step_size']
                             # Writing columns to file. Look up python's csv module
                             thewriter_t = csv.DictWriter(output_t, fieldnames=fieldnames_t)
                             thewriter_t.writeheader()

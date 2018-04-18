@@ -1,66 +1,52 @@
 library(ggplot2)
-trends = read.csv('trend_20_0_0.csv')
+library(dplyr)
+library(reshape2)
 
-n = 15
+# Somehow change the limits to make graphic readable
+trajectorySep <- function(name, trajectory, file){
 
-adam_trends = trends[trends[,1] == 'adam',]
-adam_trends$learning_rate = factor(adam_trends$learning_rate)
+  sep_trajectory <-  trajectory[trajectory[,1] == name,]
+  sep_trajectory$method <- NULL
+  sep_trajectory$learning_rate <-  factor(sep_trajectory$learning_rate)
+  n <- length(levels(sep_trajectory$learning_rate))
+  # Add elseif for different methods to decrease 1 or stay the same
+  m <- length(levels(sep_trajectory$decay)) - 1
+  title <- capture.output(cat(toupper(name), 'PLOT'))
+  filename <- capture.output(cat(file, "_", name, ".jpeg", sep = ""))
+  sep_trajectory$x <- rep.int(1:(length(sep_trajectory$value)/(n*m)), n*m)
+  colnames(sep_trajectory)[which(colnames(sep_trajectory) == "value")] <- "Val"
 
-ggplot(adam_trends, aes(x = rep.int(1:(length(value)/n), n), y = value, color = as.factor(learning_rate))) +
-  geom_line(size = 1, alpha = 0.75) +
-  geom_point() + 
-  ggtitle('ADAM PLOT') +
-  scale_color_discrete(name = "Learning rates") +
-  scale_x_continuous(name = 'X',
-                     limits = c(0, length(adam_trends[,3])/n)) + 
-  scale_y_continuous(name = 'Y',
-                     limits = c(min(adam_trends[,3]), max(adam_trends[,3]))) +
-  facet_grid(learning_rate~.)
+  sep_trajectory <- melt(sep_trajectory, id.vars = c("x", "learning_rate", "decay"))
+  #print(sep_trajectory)
+  
+  plt <- ggplot(sep_trajectory, aes(x)) +
+    geom_line(aes(y = value, color = variable), size = 1) +
+    ggtitle(title) +
+    scale_x_continuous(name = 'X', limits = c(0, 100)) +
+    scale_y_continuous(name = 'Y') +
+    scale_colour_manual(name = "Legend", labels = c("Step size", "Calculated value"), values=c("blue", "red")) + 
+    facet_grid(learning_rate ~ decay, scales = "free_y", labeller = label_both)
+  ggsave(filename = filename, plot = plt, device = "jpeg", width = 12, height = 12, dpi = 150)
+}
 
+trajectoryGraph <- function(file){
+  
+  trajectory = read.csv(file)
+  for (method in levels(factor(trajectory$method)))
+       trajectorySep(method, trajectory, sub(".csv", "", file))
+}
 
+forEveryFile <- function(dir){
+  
+  setwd(dir)
+  files <- list.files(pattern = "test_*")
+  lapply(files, trajectoryGraph)
+  setwd("../")
+}
 
-momentum_trends = trends[trends[,1] == 'momentum',]
-momentum_trends$learning_rate = factor(momentum_trends$learning_rate)
-
-ggplot(momentum_trends, aes(x = rep.int(1:(length(value)/n), n), y = value, color = as.factor(learning_rate))) +
-  geom_line(size = 1, alpha = 0.75) +
-  geom_point() + 
-  ggtitle('MOMENTUM PLOT') +
-  scale_color_discrete(name = "Learning rates") +
-  scale_x_continuous(name = 'X',
-                     limits = c(0, length(momentum_trends[,3])/n)) + 
-  scale_y_continuous(name = 'Y',
-                     limits = c(min(momentum_trends[,3]), max(momentum_trends[,3]))) +
-  facet_grid(learning_rate~.)
-
-
-
-adadelta_trends = trends[trends[,1] == 'adadelta',]
-adadelta_trends$learning_rate = factor(adadelta_trends$learning_rate)
-
-ggplot(adadelta_trends, aes(x = rep.int(1:(length(value)/n), n), y = value, color = as.factor(learning_rate))) +
-  geom_line(size = 1, alpha = 0.75) +
-  geom_point() + 
-  ggtitle('ADADELTA PLOT') +
-  scale_color_discrete(name = "Learning rates") +
-  scale_x_continuous(name = 'X',
-                     limits = c(0, length(adadelta_trends[,3])/n)) + 
-  scale_y_continuous(name = 'Y',
-                     limits = c(min(adadelta_trends[,3]), max(adadelta_trends[,3]))) +
-  facet_grid(learning_rate~.)
-
+setwd("D:/Worknfiles/PyCharm Projects/tf-min-comparison/output")
+dirs <-  list.files(pattern = "test10")
+lapply(dirs, forEveryFile)
 
 
-adagrad_trends = trends[trends[,1] == 'adagrad',]
-adagrad_trends$learning_rate = factor(adagrad_trends$learning_rate)
 
-ggplot(adagrad_trends, aes(x = rep.int(1:(length(value)/n), n), y = value, color = as.factor(learning_rate))) +
-  geom_line(size = 1, alpha = 0.75) +
-  geom_point() + 
-  ggtitle('ADAGRAD PLOT') +
-  scale_color_discrete(name = "Learning rates") +
-  scale_x_continuous(name = 'X',
-                     limits = c(0, length(adagrad_trends[,3])/n)) + 
-  scale_y_continuous(name = 'Y',
-                     limits = c(min(adagrad_trends[,3]), max(adagrad_trends[,3]))) +
-  facet_grid(learning_rate~.)
