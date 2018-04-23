@@ -6,7 +6,7 @@ import os
 import itertools
 
 
-def scalar(x, y):
+def distance(x, y):
     res = 0
     for i in range(len(x)):
         res += (x[i] - y[i]) ** 2
@@ -36,9 +36,9 @@ class Test:
                 _, s, x = sess.run([optimizer, f[0], pre_generated_functions.x])
                 in_between_points.append(s)
                 if n > 0:
-                    len_h.append(scalar(f[2], x))
+                    len_h.append(distance(f[2], x))
                 else:
-                    len_h.append(scalar([0 for _ in range(len(x))], x))
+                    len_h.append(distance([0 for _ in range(len(x))], x))
                 if np.abs(in_between_points[-1] - f[3]) <= self.eps and res_iter > n:
                     res_iter = n
 
