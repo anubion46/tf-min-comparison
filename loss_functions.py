@@ -25,6 +25,14 @@ def sum_powers(x, dim):
     return f, function_look, min_point_random, min_value_random
 
 
+def sum_sin(x, dim):
+    a = tf.constant([random() for _ in range(dim)])
+    n = tf.constant(float(dim))
+    f = tf.divide(tf.abs(tf.reduce_sum(tf.multiply(tf.sin(x), a))), n)
+    function_look = 'sum of a_i * sin(x_i) divided by n'
+    return f, function_look, [0.0 for _ in range(dim)], 0.0
+
+
 def csendes(x, dim):
     f = tf.reduce_sum(tf.multiply(tf.pow(x, tf.constant(6.0)), tf.add(tf.constant(2.0), tf.sin(tf.divide(tf.constant(1.0), x)))))
     function_look = 'sum of xi^6 * (2 + sin(1/xi)) from 1 to ' + str(dim)
