@@ -1,5 +1,5 @@
 import tensorflow as tf
-from random import random, seed
+from random import random
 import numpy as np
 
 
@@ -30,7 +30,6 @@ def generate_point(dim, r, start):
 
 
 def generate_points(dim, n, r, start):
-    seed(10)
     points = []
     for i in range(n):
         points.append(generate_point(dim, r, start))

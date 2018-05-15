@@ -34,11 +34,17 @@ def runSession(starter_learning_rate, step=0):
     values = []
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
+        # Normalization
+        starting_value = sess.run(f[0])
+        f_temp = tf.divide(tf.subtract(f[0], tf.constant(f[3])), tf.subtract(tf.constant(starting_value), tf.constant(f[3])))
+
         for i in range(epochs):
-            _, x_new, f_new = sess.run([optimizer, x, f[0]])
+            _, x_new, f_new = sess.run([optimizer, x, f_temp])
             # print(i, 'Difference:\t', round(f_new - f[3], 6))
             values.append(f_new - f[3])
+
     return values
+
 
 fig = plt.figure()
 plt.plot([i+1 for i in range(epochs)], runSession(0.3, 1), color='red', alpha=0.5)

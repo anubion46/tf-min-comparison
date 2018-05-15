@@ -26,9 +26,10 @@ class Test:
         self.decay = decay
 
     def __check_optimizer(self, optimizer, f, st_p, pre_generated_functions):
-        pre_generated_functions.x.assign(st_p)
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())  # reset values to wrong
+            sess.run(pre_generated_functions.x.assign(st_p))
+
             in_between_points = []
             len_h = []
             res_iter = self.iter_threshold
