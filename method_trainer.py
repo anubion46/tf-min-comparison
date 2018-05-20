@@ -44,7 +44,7 @@ def training_gradient_descent(losses, m, iterations, learning_rates):
                             for i in range(iterations):
                                 _, f_curr = sess.run([optimizer, f_temp])
                             temp = np.append(temp, f_curr)
-        gradient_descent_results[learning_rate] = {'best': np.min(temp).item(), 'worst': np.max(temp).item(), 'mean': np.mean(temp).item(), "median": np.median(temp).item()}
+        gradient_descent_results[learning_rate] = {'best': np.nanmin(temp).item(), 'worst': np.nanmax(temp).item(), 'mean': np.nanmean(temp).item(), "median": np.nanmedian(temp).item()}
     return gradient_descent_results
 
 
@@ -83,7 +83,7 @@ def training_adam(losses, m, iterations, learning_rates):
                                 _, f_curr = sess.run([optimizer, f_temp])
                             temp = np.append(temp, f_curr)
 
-        adam_results[learning_rate] = {'best': np.min(temp).item(), 'worst': np.max(temp).item(), 'mean': np.mean(temp).item(), "median": np.median(temp).item()}
+        adam_results[learning_rate] = {'best': np.nanmin(temp).item(), 'worst': np.nanmax(temp).item(), 'mean': np.nanmean(temp).item(), "median": np.nanmedian(temp).item()}
     return adam_results
 
 
@@ -123,7 +123,7 @@ def training_momentum(losses, m, iterations, learning_rates):
                                 _, f_curr = sess.run([optimizer, f_temp])
                             temp = np.append(temp, f_curr)
 
-        momentum_results[learning_rate] = {'best': np.min(temp).item(), 'worst': np.max(temp).item(), 'mean': np.mean(temp).item(), "median": np.median(temp).item()}
+        momentum_results[learning_rate] = {'best': np.nanmin(temp).item(), 'worst': np.nanmax(temp).item(), 'mean': np.nanmean(temp).item(), "median": np.nanmedian(temp).item()}
     return momentum_results
 
 
@@ -162,7 +162,7 @@ def training_adagrad(losses, m, iterations, learning_rates):
                                 _, f_curr = sess.run([optimizer, f_temp])
                             temp = np.append(temp, f_curr)
 
-        adagrad_results[learning_rate] = {'best': np.min(temp).item(), 'worst': np.max(temp).item(), 'mean': np.mean(temp).item(), "median": np.median(temp).item()}
+        adagrad_results[learning_rate] = {'best': np.nanmin(temp).item(), 'worst': np.nanmax(temp).item(), 'mean': np.nanmean(temp).item(), "median": np.nanmedian(temp).item()}
     return adagrad_results
 
 
@@ -203,7 +203,7 @@ def training_adadelta(losses, m, iterations, learning_rates, decays):
                                     _, f_curr = sess.run([optimizer, f_temp])
                                 temp = np.append(temp, f_curr)
 
-            adadelta_results[learning_rate][decay] = {'best': np.min(temp).item(), 'worst': np.max(temp).item(), 'mean': np.mean(temp).item(), "median": np.median(temp).item()}
+            adadelta_results[learning_rate][decay] = {'best': np.nanmin(temp).item(), 'worst': np.nanmax(temp).item(), 'mean': np.nanmean(temp).item(), "median": np.nanmedian(temp).item()}
     return adadelta_results
 
 
@@ -244,5 +244,5 @@ def training_rms(losses, m, iterations, learning_rates, decays):
                                     _, f_curr = sess.run([optimizer, f_temp])
                                 temp = np.append(temp, f_curr)
 
-            rms_results[learning_rate][decay] = {'best': np.min(temp).item(), 'worst': np.max(temp).item(), 'mean': np.mean(temp).item(), "median": np.median(temp).item()}
+            rms_results[learning_rate][decay] = {'best': np.nanmin(temp).item(), 'worst': np.nanmax(temp).item(), 'mean': np.nanmean(temp).item(), "median": np.nanmedian(temp).item()}
     return rms_results

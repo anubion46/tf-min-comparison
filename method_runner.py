@@ -62,10 +62,10 @@ class MethodRunner:
             best_gd_params.append(search_learning_rate(training_gradient_descent, metric))
         # print('Best gradient descent learning rates:', " ".join([str(i) for i in best_gd_params]), '\n')
 
-        test_gd_best = mtest.test_gradient_descent(self.test_losses, self.m, self.iterations, best_gd_params[0], np.amin)
-        test_gd_worst = mtest.test_gradient_descent(self.test_losses, self.m, self.iterations, best_gd_params[1], np.amax)
-        test_gd_mean = mtest.test_gradient_descent(self.test_losses, self.m, self.iterations, best_gd_params[2], np.mean)
-        test_gd_median = mtest.test_gradient_descent(self.test_losses, self.m, self.iterations, best_gd_params[3], np.median)
+        test_gd_best = mtest.test_gradient_descent(self.test_losses, self.m, self.iterations, best_gd_params[0], np.nanmin)
+        test_gd_worst = mtest.test_gradient_descent(self.test_losses, self.m, self.iterations, best_gd_params[1], np.nanmax)
+        test_gd_mean = mtest.test_gradient_descent(self.test_losses, self.m, self.iterations, best_gd_params[2], np.nanmean)
+        test_gd_median = mtest.test_gradient_descent(self.test_losses, self.m, self.iterations, best_gd_params[3], np.nanmedian)
 
         fig = plt.figure()
         plt.plot(self.x, test_gd_best, color='red', alpha=0.5, label='Best, LR:' + str(round(best_gd_params[0], 5)))
@@ -111,10 +111,10 @@ class MethodRunner:
             best_adam_params.append(search_learning_rate(training_adam, metric))
         # print('Best adam learning rates:', " ".join([str(i) for i in best_adam_params]), '\n')
 
-        test_adam_best = mtest.test_adam(self.test_losses, self.m, self.iterations, best_adam_params[0], np.amin)
-        test_adam_worst = mtest.test_adam(self.test_losses, self.m, self.iterations, best_adam_params[1], np.amax)
-        test_adam_mean = mtest.test_adam(self.test_losses, self.m, self.iterations, best_adam_params[2], np.mean)
-        test_adam_median = mtest.test_adam(self.test_losses, self.m, self.iterations, best_adam_params[3], np.median)
+        test_adam_best = mtest.test_adam(self.test_losses, self.m, self.iterations, best_adam_params[0], np.nanmin)
+        test_adam_worst = mtest.test_adam(self.test_losses, self.m, self.iterations, best_adam_params[1], np.nanmax)
+        test_adam_mean = mtest.test_adam(self.test_losses, self.m, self.iterations, best_adam_params[2], np.nanmean)
+        test_adam_median = mtest.test_adam(self.test_losses, self.m, self.iterations, best_adam_params[3], np.nanmedian)
 
         fig = plt.figure()
         plt.plot(self.x, test_adam_best, color='red', alpha=0.5, label='Best, LR: ' + str(round(best_adam_params[0], 5)))
@@ -159,10 +159,10 @@ class MethodRunner:
             best_momentum_params.append(search_learning_rate(training_momentum, metric))
         # print('Best momentum learning rates:', " ".join([str(i) for i in best_adam_params]), '\n')
 
-        test_momentum_best = mtest.test_momentum(self.test_losses, self.m, self.iterations, best_momentum_params[0], np.amin)
-        test_momentum_worst = mtest.test_momentum(self.test_losses, self.m, self.iterations, best_momentum_params[1], np.amax)
-        test_momentum_mean = mtest.test_momentum(self.test_losses, self.m, self.iterations, best_momentum_params[2], np.mean)
-        test_momentum_median = mtest.test_momentum(self.test_losses, self.m, self.iterations, best_momentum_params[3], np.median)
+        test_momentum_best = mtest.test_momentum(self.test_losses, self.m, self.iterations, best_momentum_params[0], np.nanmin)
+        test_momentum_worst = mtest.test_momentum(self.test_losses, self.m, self.iterations, best_momentum_params[1], np.nanmax)
+        test_momentum_mean = mtest.test_momentum(self.test_losses, self.m, self.iterations, best_momentum_params[2], np.nanmean)
+        test_momentum_median = mtest.test_momentum(self.test_losses, self.m, self.iterations, best_momentum_params[3], np.nanmedian)
 
         fig = plt.figure()
         plt.plot(self.x, test_momentum_best, color='red', alpha=0.5, label='Best, LR: ' + str(round(best_momentum_params[0], 5)))
@@ -207,10 +207,10 @@ class MethodRunner:
             best_adagrad_params.append(search_learning_rate(training_adagrad, metric))
         # print('Best adam learning rates:', " ".join([str(i) for i in best_adam_params]), '\n')
 
-        test_adagrad_best = mtest.test_adagrad(self.test_losses, self.m, self.iterations, best_adagrad_params[0], np.amin)
-        test_adagrad_worst = mtest.test_adagrad(self.test_losses, self.m, self.iterations, best_adagrad_params[1], np.amax)
-        test_adagrad_mean = mtest.test_adagrad(self.test_losses, self.m, self.iterations, best_adagrad_params[2], np.mean)
-        test_adagrad_median = mtest.test_adagrad(self.test_losses, self.m, self.iterations, best_adagrad_params[3], np.median)
+        test_adagrad_best = mtest.test_adagrad(self.test_losses, self.m, self.iterations, best_adagrad_params[0], np.nanmin)
+        test_adagrad_worst = mtest.test_adagrad(self.test_losses, self.m, self.iterations, best_adagrad_params[1], np.nanmax)
+        test_adagrad_mean = mtest.test_adagrad(self.test_losses, self.m, self.iterations, best_adagrad_params[2], np.nanmean)
+        test_adagrad_median = mtest.test_adagrad(self.test_losses, self.m, self.iterations, best_adagrad_params[3], np.nanmedian)
 
         fig = plt.figure()
         plt.plot(self.x, test_adagrad_best, color='red', alpha=0.5, label='Best, LR: ' + str(round(best_adagrad_params[0], 5)))
@@ -256,10 +256,10 @@ class MethodRunner:
             best_adadelta_params.append(search_learning_rate(training_adadelta, metric, search_decay=True))
         # print('Best adadelta learning rates and decays:', " ".join([str(i) for i in best_gd_params]), '\n')
 
-        test_adadelta_best = mtest.test_adadelta(self.test_losses, self.m, self.iterations, best_adadelta_params[0][0], best_adadelta_params[0][1], np.amin)
-        test_adadelta_worst = mtest.test_adadelta(self.test_losses, self.m, self.iterations, best_adadelta_params[1][0], best_adadelta_params[1][1], np.amax)
-        test_adadelta_mean = mtest.test_adadelta(self.test_losses, self.m, self.iterations, best_adadelta_params[2][0], best_adadelta_params[2][1], np.mean)
-        test_adadelta_median = mtest.test_adadelta(self.test_losses, self.m, self.iterations, best_adadelta_params[3][0], best_adadelta_params[3][1], np.median)
+        test_adadelta_best = mtest.test_adadelta(self.test_losses, self.m, self.iterations, best_adadelta_params[0][0], best_adadelta_params[0][1], np.nanmin)
+        test_adadelta_worst = mtest.test_adadelta(self.test_losses, self.m, self.iterations, best_adadelta_params[1][0], best_adadelta_params[1][1], np.nanmax)
+        test_adadelta_mean = mtest.test_adadelta(self.test_losses, self.m, self.iterations, best_adadelta_params[2][0], best_adadelta_params[2][1], np.nanmean)
+        test_adadelta_median = mtest.test_adadelta(self.test_losses, self.m, self.iterations, best_adadelta_params[3][0], best_adadelta_params[3][1], np.nanmedian)
 
         fig = plt.figure()
         plt.plot(self.x, test_adadelta_best, color='red', alpha=0.5, label='Best, LR: ' + str(round(best_adadelta_params[0][0], 5)) + '; DEC: ' + str(round(best_adadelta_params[0][1], 5)))
@@ -305,10 +305,10 @@ class MethodRunner:
             best_rms_params.append(search_learning_rate(training_rms, metric, search_decay=True))
         # print('Best RMSProb learning rates and decays:', " ".join([str(i) for i in best_gd_params]), '\n')
 
-        test_rms_best = mtest.test_rms(self.test_losses, self.m, self.iterations, best_rms_params[0][0], best_rms_params[0][1], np.amin)
-        test_rms_worst = mtest.test_rms(self.test_losses, self.m, self.iterations, best_rms_params[1][0], best_rms_params[1][1], np.amax)
-        test_rms_mean = mtest.test_rms(self.test_losses, self.m, self.iterations, best_rms_params[2][0], best_rms_params[2][1], np.mean)
-        test_rms_median = mtest.test_rms(self.test_losses, self.m, self.iterations, best_rms_params[3][0], best_rms_params[3][1], np.median)
+        test_rms_best = mtest.test_rms(self.test_losses, self.m, self.iterations, best_rms_params[0][0], best_rms_params[0][1], np.nanmin)
+        test_rms_worst = mtest.test_rms(self.test_losses, self.m, self.iterations, best_rms_params[1][0], best_rms_params[1][1], np.nanmax)
+        test_rms_mean = mtest.test_rms(self.test_losses, self.m, self.iterations, best_rms_params[2][0], best_rms_params[2][1], np.nanmean)
+        test_rms_median = mtest.test_rms(self.test_losses, self.m, self.iterations, best_rms_params[3][0], best_rms_params[3][1], np.nanmedian)
 
         fig = plt.figure()
         plt.plot(self.x, test_rms_best, color='red', alpha=0.5, label='Best, LR: ' + str(round(best_rms_params[0][0], 5)) + '; DEC: ' + str(round(best_rms_params[0][1], 5)))
