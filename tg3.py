@@ -1,5 +1,5 @@
 import loss_functions as lf
-import method_run as mr
+import method_runner as mr
 import numpy as np
 import os
 
@@ -7,40 +7,54 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
-m = 1
-iterations = 300
+m = 2
+iterations = 30
 
 
 # train_losses = {
-#                 'sum_sin': [lf.sum_sin, {40: 2, 15: 2}],
-#                 'sum_powers': [lf.sum_powers, {40: 2, 15: 2}],
-#                 'rastrigin': [lf.rastrigin, {40: 2, 15: 2}],
-#                 'deb01': [lf.deb01, {40: 2, 15: 2}],
-#                 'alpine01': [lf.alpine01, {40: 2, 15: 2}]
+#                 'sum_sin': [lf.sum_sin, {3: 2, 5: 2, 7: 2, 10: 2, 15: 2, 20: 2}],
+#                 'sum_powers': [lf.sum_powers, {3: 2, 5: 2, 7: 2, 10: 2, 15: 2, 20: 2}],
+#                 'rastrigin': [lf.rastrigin, {3: 2, 5: 2, 7: 2, 10: 2, 15: 2, 20: 2}],
+#                 'deb01': [lf.deb01, {3: 2, 5: 2, 7: 2, 10: 2, 15: 2, 20: 2}],
+#                 'alpine01': [lf.alpine01, {3: 2, 5: 2, 7: 2, 10: 2, 15: 2, 20: 2}]
 #                 }
-
+#
 # test_losses = {
-#                'sum_sin': [lf.sum_sin, {40: 4, 15: 4}],
-#                'sum_powers': [lf.sum_powers, {40: 4, 15: 4}],
-#                'rastrigin': [lf.rastrigin, {40: 4, 15: 4}],
-#                'deb01': [lf.deb01, {40: 4, 15: 4}],
-#                'alpine01': [lf.alpine01, {4: 4, 15: 4}]
+#                'sum_sin': [lf.sum_sin, {3: 4, 5: 4, 7: 4, 10: 4, 15: 4, 20: 4, 25: 4}],
+#                'sum_powers': [lf.sum_powers, {3: 4, 5: 4, 7: 4, 10: 4, 15: 4, 20: 4, 25: 4}],
+#                'rastrigin': [lf.rastrigin, {3: 4, 5: 4, 7: 4, 10: 4, 15: 4, 20: 4, 25: 4}],
+#                'deb01': [lf.deb01, {3: 4, 5: 4, 7: 4, 10: 4, 15: 4, 20: 4, 25: 4}],
+#                'alpine01': [lf.alpine01, {3: 4, 5: 4, 7: 4, 10: 4, 15: 4, 20: 4, 25: 4}]
 #                }
 
-train_losses = {'alpine01': [lf.alpine01, {15: 1}]}
+train_losses = {
+                'sum_sin': [lf.sum_sin, {3: 2, 5: 2}],
+                'sum_powers': [lf.sum_powers, {3: 2, 5: 2}],
+                'rastrigin': [lf.rastrigin, {3: 2, 5: 2}],
+                'deb01': [lf.deb01, {3: 2, 5: 2}],
+                'alpine01': [lf.alpine01, {3: 2, 5: 2}]
+                }
 
-test_losses = {'alpine01': [lf.alpine01, {15: 1}]}
+test_losses = {
+               'sum_sin': [lf.sum_sin, {3: 4, 5: 4}],
+               'sum_powers': [lf.sum_powers, {3: 4, 5: 4}],
+               'rastrigin': [lf.rastrigin, {3: 4, 5: 4}],
+               'deb01': [lf.deb01, {3: 4, 5: 4}],
+               'alpine01': [lf.alpine01, {3: 4, 5: 4}]
+               }
 
 
-# mr.runGradientDescent(train_losses, test_losses, m, iterations, np.geomspace(0.001, 10.0, 5))
-#
-# mr.runAdam(train_losses, test_losses, m, iterations, np.geomspace(0.001, 0.1, 5))
-#
-# mr.runMomentum(train_losses, test_losses, m, iterations, np.geomspace(0.001, 0.1, 5))
+dest = 'output/adaptive2/'
+if not os.path.exists(dest):
+    os.mkdir(dest)
+runner = mr.MethodRunner(iterations, m, train_losses, test_losses, save=dest)
 
-mr.runAdagrad(train_losses, test_losses, m, iterations, np.geomspace(0.0001, 1.0, 15))
+nspace = 10
+runner.runGradientDescent(np.geomspace(0.001, 10.0, nspace))
+runner.runAdam(np.geomspace(0.001, 0.1, nspace))
+runner.runMomentum(np.geomspace(0.001, 0.1, nspace))
+runner.runAdagrad(np.geomspace(0.0001, 10.0, nspace))
+runner.runAdadelta(np.geomspace(0.01, 10, nspace), np.geomspace(0.9, 0.9999, 2))
+runner.runRMS(np.geomspace(0.01, 10.0, nspace), np.geomspace(0.9, 0.9999, 2))
 
-# mr.runAdadelta(train_losses, test_losses, m, iterations, np.geomspace(0.01, 100, 5), np.geomspace(0.9, 0.9999, 2))
-#
-# mr.runRMS(train_losses, test_losses, m, iterations, np.geomspace(0.01, 10.0, 5), np.geomspace(0.9, 0.9999, 2))
-
+runner.show_plot()

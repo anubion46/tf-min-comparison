@@ -30,8 +30,5 @@ def generate_point(dim, r, start):
 
 
 def generate_points(dim, n, r, start):
-    points = []
-    for i in range(n):
-        points.append(generate_point(dim, r, start))
-    return points
+    return [generate_point(dim, r, start) for _ in range(n)]
 

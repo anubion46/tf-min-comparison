@@ -50,3 +50,12 @@ lapply(dirs, forEveryFile)
 
 
 
+file <- read.csv('test_results.csv')
+file <-  file[file[,2] == 'median',]
+ggplot(file, aes(iteration)) +
+  geom_line(aes(y = value, color = method), size = 1) +
+  scale_x_continuous(name = 'X') +
+  scale_y_continuous(name = 'Y')
+
+
+
